@@ -18,6 +18,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # FATAL
 logging.getLogger('tensorflow').setLevel(logging.FATAL)
 #IMPORT USER-DEFINED FUNCTIONS
 from feature_extraction import get_embedding, get_embeddings_from_list_file
+from preprocessing import *
 from preprocess import get_fft_spectrum
 import parameters as p
 
@@ -30,7 +31,7 @@ def args():
                        required=True)
     parser.add_argument( '-n', '--name',
                         help='Specify the name of the person you want to enroll',
-                        required=False)
+                        required=True)
     parser.add_argument('-f', '--file',
                         help='Specify the audio file you want to enroll',
                         type=lambda fn:file_choices(("csv","wav","flac"),fn),
@@ -46,24 +47,25 @@ def enroll(name,file):
         outputs: None"""
 
     print("Loading model weights from [{}]....".format(p.MODEL_FILE))
-    try:
-        model = load_model(p.MODEL_FILE)
-    except:
-        print("Failed to load weights from the weights file, please ensure *.pb file is present in the MODEL_FILE directory")
-        exit()
+    # try:
+    model = load_model(p.MODEL_FILE)
+    # except:
+    #     print("Failed to load weights from the weights file, please ensure *.pb file is present in the MODEL_FILE directory")
+    #     exit()
     
-    try:
-        print("Processing enroll sample....")
-        enroll_result = get_embedding(model, file, p.MAX_SEC)
-        enroll_embs = np.array(enroll_result.tolist())
-        speaker = name
-    except:
-        print("Error processing the input audio file. Make sure the path.")
-    try:
-        np.save(os.path.join(p.EMBED_LIST_FILE,speaker +".npy"), enroll_embs)
-        print("Succesfully enrolled the user")
-    except:
-        print("Unable to save the user into the database.")
+    # try:
+    print("Processing enroll sample....")
+    preprocess_wav(file)
+    enroll_result = get_embedding(model, "processed.wav", p.MAX_SEC)
+    enroll_embs = np.array(enroll_result.tolist())
+    speaker = name
+    # except:
+    #     print("Error processing the input audio file. Make sure the path.")
+    # try:
+    np.save(os.path.join(p.EMBED_LIST_FILE,speaker +".npy"), enroll_embs)
+    print("Succesfully enrolled the user")
+    # except:
+    #     print("Unable to save the user into the database.")
 
 def enroll_csv(csv_file):
     """Enroll a list of users using csv file
@@ -79,6 +81,7 @@ def enroll_csv(csv_file):
         exit()
     print("Processing enroll samples....")
     try:
+        #TODO: add preprocessing before getting embeddings
         enroll_results = get_embeddings_from_list_file(model, csv_file, p.MAX_SEC)
         enroll_embs = np.array([emb.tolist() for emb in enroll_results['embedding']])
         speakers = enroll_results['speaker']
@@ -100,7 +103,7 @@ def recognize(file):
     
     if os.path.exists(p.EMBED_LIST_FILE):
         embeds = os.listdir(p.EMBED_LIST_FILE)
-    if len(embeds) is 0:
+    if len(embeds) == 0:
         print("No enrolled users found")
         exit()
     print("Loading model weights from [{}]....".format(p.MODEL_FILE))
@@ -111,21 +114,22 @@ def recognize(file):
         print("Failed to load weights from the weights file, please ensure *.pb file is present in the MODEL_FILE directory")
         exit()
         
-    distances = {}
+    # distances = {}
     print("Processing test sample....")
     print("Comparing test sample against enroll samples....")
-    test_result = get_embedding(model, file, p.MAX_SEC)
+    preprocess_wav(file)
+    test_result = get_embedding(model, "processed.wav", p.MAX_SEC)
     test_embs = np.array(test_result.tolist())
-    for emb in embeds:
-        enroll_embs = np.load(os.path.join(p.EMBED_LIST_FILE,emb))
-        speaker = emb.replace(".npy","")
-        distance = euclidean(test_embs, enroll_embs)
-        distances.update({speaker:distance})
-    if min(list(distances.values()))<p.THRESHOLD:
-        print("Recognized: ",min(distances, key=distances.get))
+    emb = name + '.npy'
+    enroll_embs = np.load(os.path.join(p.EMBED_LIST_FILE,emb))
+    distance = euclidean(test_embs, enroll_embs)
+    # print(p.THRESHOLD)
+    if distance<0.03:
+        print("Authenticated: True")
+        print("Score: ",distance)
     else:
-        print("Could not identify the user, try enrolling again with a clear voice sample")
-        print("Score: ",min(list(distances.values())))
+        print("Authenticated: False")
+        print("Score: ",distance)
         exit()
         
 #Helper functions
@@ -162,5 +166,3 @@ if __name__ == '__main__':
             enroll(name, file)
         if task == 'recognize':
             recognize(file)
-
-
