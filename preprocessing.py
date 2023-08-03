@@ -118,11 +118,11 @@ def preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray],
     if normalize:
         wav = normalize_volume(wav, audio_norm_target_dBFS, increase_only=True)
     sf.write("processed.wav", wav.astype(np.float32), sampling_rate)
-    # if reduce_noise:
+    if reduce_noise:
         # load data
-        # rate, data = wavfile.read("processed.wav")
-        # # perform noise reduction
-        # reduced_noise = nr.reduce_noise(y=data, sr=rate)
-        # wavfile.write("processed.wav", rate, reduced_noise)
+        rate, data = wavfile.read("processed.wav")
+        # perform noise reduction
+        reduced_noise = nr.reduce_noise(y=data, sr=rate)
+        wavfile.write("processed.wav", rate, reduced_noise)
     if webrtcvad and trim_silence:
         trim_long_silences("processed.wav")
