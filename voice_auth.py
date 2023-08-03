@@ -96,7 +96,7 @@ def enroll_csv(csv_file):
     except:
         print("Unable to save the user into the database.")
 
-def recognize(file):
+def recognize(file, name):
     """Recognize the input audio file by comparing to saved users' voice prints
         inputs: str (Path to audio file of unknown person to recognize)
         outputs: str (Name of the person recognized)"""
@@ -116,7 +116,6 @@ def recognize(file):
         
     # distances = {}
     print("Processing test sample....")
-    print("Comparing test sample against enroll samples....")
     preprocess_wav(file)
     test_result = get_embedding(model, "processed.wav", p.MAX_SEC)
     test_embs = np.array(test_result.tolist())
@@ -130,7 +129,7 @@ def recognize(file):
     else:
         print("Authenticated: False")
         print("Score: ",distance)
-        exit()
+    return distance
         
 #Helper functions
 def file_choices(choices,filename):
@@ -165,4 +164,4 @@ if __name__ == '__main__':
         if task == 'enroll':
             enroll(name, file)
         if task == 'recognize':
-            recognize(file)
+            recognize(file, name)
