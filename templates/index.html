@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Voice Authentication</title>
+    </head>
+    <body>
+        <div id="fileContainer">
+            <h1>Upload New Files</h1>
+            <form method="post" enctype="multipart/form-data">
+                <input type="file" name="file1"/>
+                <br>
+                <input type="file" name="file2"/>
+                <br>
+                <input type="text" name="user" id="user"/>
+                <br>
+                <input type="submit" value="Analyse"/>
+            </form>
+            {% if score1 != -1 and score2 != -1 %}
+            <div id="scoreVales">
+                <h1>Scores</h1>
+                <p>{{score1, score2}}</p>
+            </div>
+            {% endif %}
+        </div>
+    </body>
+</html>

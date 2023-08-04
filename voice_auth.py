@@ -96,7 +96,7 @@ def enroll_csv(csv_file):
     except:
         print("Unable to save the user into the database.")
 
-def recognize(file, name):
+def recognize(file, name, is_eucl: Optional[bool] = False):
     """Recognize the input audio file by comparing to saved users' voice prints
         inputs: str (Path to audio file of unknown person to recognize)
         outputs: str (Name of the person recognized)"""
@@ -121,7 +121,10 @@ def recognize(file, name):
     test_embs = np.array(test_result.tolist())
     emb = name + '.npy'
     enroll_embs = np.load(os.path.join(p.EMBED_LIST_FILE,emb))
-    distance = euclidean(test_embs, enroll_embs)
+    if is_eucl:
+        distance = euclidean(test_embs, enroll_embs)
+    else:
+        distance = cosine(test_embs, enroll_embs)
     # print(p.THRESHOLD)
     if distance<0.03:
         print("Authenticated: True")
