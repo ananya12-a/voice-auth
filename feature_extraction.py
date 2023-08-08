@@ -5,6 +5,12 @@ from scipy.spatial.distance import cdist, euclidean, cosine
 
 from preprocess import get_fft_spectrum
 import parameters as p
+import torch
+from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
+from pyannote.audio import Audio
+from pyannote.core import Segment
+import wave
+import contextlib
 
 
 def buckets(max_time, steptime, frameskip):
@@ -28,11 +34,24 @@ def buckets(max_time, steptime, frameskip):
             buckets[i] = int(s)
     return buckets
 
+def get_duration(wav_file):
+    with contextlib.closing(wave.open(wav_file,'r')) as f:
+        frames = f.getnframes()
+        rate = f.getframerate()
+        duration = frames / float(rate)
+        return duration
 
-def get_embedding(model, wav_file, max_time):
+def get_embedding(wav_file, max_time):
+    model = PretrainedSpeakerEmbedding(
+        "speechbrain/spkrec-ecapa-voxceleb")
+        #device=torch.device("cuda"))
+    audio = Audio(sample_rate=p.SAMPLE_RATE, mono="downmix")
     buckets_var = buckets(p.MAX_SEC, p.BUCKET_STEP, p.FRAME_STEP)
     signal = get_fft_spectrum(wav_file, buckets_var)
-    embedding = np.squeeze(model.predict(signal.reshape(1,*signal.shape,1)))
+    
+    # embedding = np.squeeze(model.predict(signal.reshape(1,*signal.shape,1)))
+    waveform, sample_rate = audio.crop(wav_file, Segment(0, get_duration(wav_file)))
+    embedding = model(waveform.reshape(1,*waveform.shape))
     return embedding
 
 

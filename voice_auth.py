@@ -6,7 +6,7 @@ import os
 import sys
 import numpy as np
 import pandas as pd
-from scipy.spatial.distance import cdist, euclidean, cosine 
+from scipy.spatial.distance import cdist, euclidean
 import warnings
 from keras.models import load_model
 import logging
@@ -48,7 +48,7 @@ def enroll(name,file):
 
     print("Loading model weights from [{}]....".format(p.MODEL_FILE))
     # try:
-    model = load_model(p.MODEL_FILE)
+    # model = load_model(p.MODEL_FILE)
     # except:
     #     print("Failed to load weights from the weights file, please ensure *.pb file is present in the MODEL_FILE directory")
     #     exit()
@@ -56,14 +56,14 @@ def enroll(name,file):
     # try:
     print("Processing enroll sample....")
     preprocess_wav(file)
-    enroll_result = get_embedding(model, "processed.wav", p.MAX_SEC)
+    enroll_result = get_embedding("processed.wav", p.MAX_SEC)
     enroll_embs = np.array(enroll_result.tolist())
     speaker = name
     # except:
     #     print("Error processing the input audio file. Make sure the path.")
     # try:
     np.save(os.path.join(p.EMBED_LIST_FILE,speaker +".npy"), enroll_embs)
-    print("Succesfully enrolled the user")
+    print(f"Succesfully enrolled {name}")
     # except:
     #     print("Unable to save the user into the database.")
 
@@ -116,24 +116,24 @@ def recognize(file, name, is_eucl: Optional[bool] = False):
         print("No enrolled users found")
         exit()
     print("Loading model weights from [{}]....".format(p.MODEL_FILE))
-    try:
-        model = load_model(p.MODEL_FILE)
+    # try:
+    #     model = load_model(p.MODEL_FILE)
 
-    except:
-        print("Failed to load weights from the weights file, please ensure *.pb file is present in the MODEL_FILE directory")
-        exit()
+    # except:
+    #     print("Failed to load weights from the weights file, please ensure *.pb file is present in the MODEL_FILE directory")
+    #     exit()
         
     # distances = {}
     print("Processing test sample....")
     preprocess_wav(file)
-    test_result = get_embedding(model, "processed.wav", p.MAX_SEC)
+    test_result = get_embedding("processed.wav", p.MAX_SEC)
     test_embs = np.array(test_result.tolist())
     emb = name + '.npy'
     enroll_embs = np.load(os.path.join(p.EMBED_LIST_FILE,emb))
     if is_eucl:
         distance = euclidean(test_embs, enroll_embs)
     else:
-        distance = cosine(test_embs, enroll_embs)
+        distance = cdist(test_embs, enroll_embs, metric="cosine")[0][0]
     # print(p.THRESHOLD)
     if distance<0.03:
         print("Authenticated: True")
