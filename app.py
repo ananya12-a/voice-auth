@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, redirect
+from flask_bootstrap import Bootstrap
 import os
 
-from voice_auth import recognize
+from voice_auth import recognize, get_users
 
 app = Flask(__name__)
+bootstrap = Bootstrap(app)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -28,7 +30,7 @@ def index():
             dist1 = recognize('static/voice-samples/file1.wav', user)
             dist2 = recognize('static/voice-samples/file2.wav', user)
             print(dist1, dist2)
-    return render_template('index.html', score1=dist1, score2=dist2)
+    return render_template('index.html', score1=dist1, score2=dist2, users = get_users())
 
 if __name__ == "__main__":
     app.run(debug=True, threaded=True, port=8000)

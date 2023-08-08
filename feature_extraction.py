@@ -8,6 +8,7 @@ import parameters as p
 
 
 def buckets(max_time, steptime, frameskip):
+    #the downsampled sizes of feature maps at various layers of the CNN
     buckets = {}
     frames_per_sec = int(1/frameskip)
     end_frame = int(max_time*frames_per_sec)

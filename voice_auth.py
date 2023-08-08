@@ -96,6 +96,15 @@ def enroll_csv(csv_file):
     except:
         print("Unable to save the user into the database.")
 
+def get_users():
+    if os.path.exists(p.EMBED_LIST_FILE):
+        embeds = os.listdir(p.EMBED_LIST_FILE)
+        for i, embed in enumerate(embeds):
+            embeds[i] = embed[:-4]
+        return embeds
+    else:
+        print("Path doesn't exist")
+
 def recognize(file, name, is_eucl: Optional[bool] = False):
     """Recognize the input audio file by comparing to saved users' voice prints
         inputs: str (Path to audio file of unknown person to recognize)

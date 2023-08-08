@@ -1,27 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Voice Authentication</title>
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <title>Voice Authentication</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    {% extends "bootstrap/base.html" %}
+    {% block title %}Upload and Analyze Files{% endblock %}
+
+    {% block content %}
+    <div class="container mt-5">
         <div id="fileContainer">
             <h1>Upload New Files</h1>
             <form method="post" enctype="multipart/form-data">
-                <input type="file" name="file1"/>
-                <br>
-                <input type="file" name="file2"/>
-                <br>
-                <input type="text" name="user" id="user"/>
-                <br>
-                <input type="submit" value="Analyse"/>
+                <div class="form-group">
+                    <label for="file1">File 1:</label>
+                    <input type="file" class="form-control-file" name="file1" id="file1">
+                </div>
+                <div class="form-group">
+                    <label for="file2">File 2:</label>
+                    <input type="file" class="form-control-file" name="file2" id="file2">
+                </div>
+                <div class="form-group">
+                    <label for="user">Username:</label>
+                    <input type="text" class="form-control" name="user" id="user">
+                </div>
+
+                <button type="submit" class="btn btn-success">Analyse</button>
             </form>
+
             {% if score1 != -1 and score2 != -1 %}
-            <div id="scoreVales">
+            <div id="scoreValues" class="mt-4">
                 <h1>Scores</h1>
-                <p>{{score1, score2}}</p>
+                <p>{{ score1 }}, {{ score2 }}</p>
             </div>
             {% endif %}
         </div>
-    </body>
+    </div>
+    {% endblock %}
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
 </html>
