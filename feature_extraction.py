@@ -46,8 +46,8 @@ def get_embedding(wav_file, max_time):
         "speechbrain/spkrec-ecapa-voxceleb")
         #device=torch.device("cuda"))
     audio = Audio(sample_rate=p.SAMPLE_RATE, mono="downmix")
-    buckets_var = buckets(p.MAX_SEC, p.BUCKET_STEP, p.FRAME_STEP)
-    signal = get_fft_spectrum(wav_file, buckets_var)
+    # buckets_var = buckets(p.MAX_SEC, p.BUCKET_STEP, p.FRAME_STEP)
+    # signal = get_fft_spectrum(wav_file, buckets_var)
     
     # embedding = np.squeeze(model.predict(signal.reshape(1,*signal.shape,1)))
     waveform, sample_rate = audio.crop(wav_file, Segment(0, get_duration(wav_file)))

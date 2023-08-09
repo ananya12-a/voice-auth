@@ -5,6 +5,7 @@ from warnings import warn
 import numpy as np
 import librosa
 import struct
+import os
 import soundfile as sf
 from scipy.io import wavfile
 from pydub import AudioSegment
@@ -22,6 +23,9 @@ audio_norm_target_dBFS = -30
 vad_window_length = 30
 vad_moving_average_width = 8
 vad_max_silence_length = 6
+
+def get_extension(filename):
+    return os.path.splitext(filename)[1][1:]
 
 def normalize_volume(wav, target_dBFS, increase_only=False, decrease_only=False):
     if increase_only and decrease_only:
@@ -89,6 +93,49 @@ def trim_long_silences(fpath):
         combined += chunk
     combined.export(fpath, format = "wav")
 
+# def convert_to_wav(fpath):
+#     ext = get_extension(fpath)
+#     if ext == 'm4a':
+#         track = AudioSegment.from_file(fpath,  format= 'm4a')
+#         res = track.export(os.path.splitext(fpath)[0]+'.wav', format='wav')
+#         print(res)
+#     elif ext == 'mp3':
+#         sound = AudioSegment.from_mp3(fpath)
+#         res = sound.export(os.path.splitext(fpath)[0]+'.wav', format="wav")
+#         print(res)
+#     elif ext == 'ogg':
+#         song = AudioSegment.from_ogg(fpath)
+#         res = song.export(os.path.splitext(fpath)[0]+'.wav', format="wav")
+#         print(res)
+#     elif ext == 'opus':
+#         return
+#     elif ext == 'mpeg':
+#         return
+#     elif ext == 'mp4':
+#         return
+#     elif ext == 'aac':
+#         return
+
+def convert_to_wav(input_file_path, output_file_path):
+    try:
+        # Load the audio file
+        audio = AudioSegment.from_file(input_file_path)
+
+        # Ensure the output file has a .wav extension
+        if not output_file_path.lower().endswith('.wav'):
+            output_file_path = os.path.splitext(output_file_path)[0] + '.wav'
+
+        # Export the audio as a WAV file
+        audio.export(output_file_path, format='wav')
+
+        print(f"Conversion successful. Output WAV file: {output_file_path}")
+
+        # Delete the original input file
+        os.remove(input_file_path)
+        print(f"Original file '{input_file_path}' deleted.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 def preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray],
                    source_sr: Optional[int] = None,
                    normalize: Optional[bool] = True,
@@ -105,6 +152,9 @@ def preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray],
     hyperparameters. If passing a filepath, the sampling rate will be automatically detected and 
     this argument will be ignored.
     """
+    if get_extension(fpath_or_wav) != 'wav':
+        convert_to_wav(fpath_or_wav, os.path.splitext(fpath_or_wav)[0]+'.wav')
+        fpath_or_wav = os.path.splitext(fpath_or_wav)[0]+'.wav'
     # Load the wav from disk if needed
     if isinstance(fpath_or_wav, str) or isinstance(fpath_or_wav, Path):
         wav, source_sr = librosa.load(str(fpath_or_wav), sr=None)
