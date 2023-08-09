@@ -40,7 +40,7 @@ def args():
     return ret
 
 
-def enroll(name,file):
+def enroll(name,file, change_sr: Optional[bool] = False):
     """Enroll a user with an audio file
         inputs: str (Name of the person to be enrolled and registered)
                 str (Path to the audio file of the person to enroll)
@@ -105,7 +105,7 @@ def get_users():
     else:
         print("Path doesn't exist")
 
-def recognize(file, name, is_eucl: Optional[bool] = False):
+def recognize(file, name, is_eucl: Optional[bool] = False, change_sr: Optional[bool] = False):
     """Recognize the input audio file by comparing to saved users' voice prints
         inputs: str (Path to audio file of unknown person to recognize)
         outputs: str (Name of the person recognized)"""

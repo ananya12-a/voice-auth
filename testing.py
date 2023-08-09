@@ -3,6 +3,7 @@ import numpy as np
 import os
 import pandas as pd
 from preprocessing import convert_to_wav
+import parameters as p
 
 # wav_files = ["aa1.wav", "aa2.wav", "aa3.wav", "aa4.wav", "aa5.wav", "aa6.wav", "aa7.wav", "aa8.wav", "aa9.wav", "aa10.wav",  "aa-resemble.wav", "aa-genny.wav",
 #              "dg1.wav", "dg2.wav", 
@@ -56,14 +57,38 @@ for user in users:
     # path = f"data/va-samples/{user}"
     # dir_list = os.listdir(path)
     # print(path + "/" + dir_list[0])
-    enroll(str(user), f"data/va-samples/{user}/enroll.wav")
+    enroll(str(user), f"data/va-samples-8000/{user}/enroll.wav", change_sr=True)
 
-for i in range(len(users)):
+
+total = 0
+tp =0
+tn = 0
+fp=0
+fn = 0
+for i, user_i in enumerate(users):
     for j,user in enumerate(users):
         # path = f"data/va-samples/{user}"
         # dir_list = os.listdir(path)
         # print(path + "/" + dir_list[1])
-        result[i][j] = recognize(f"data/va-samples/{user}/sample.wav", str(user), is_eucl=False)
+        result[i][j] = recognize(f"data/va-samples-8000/{user_i}/sample.wav", str(user), is_eucl=False, change_sr=True)
+        #actual positive
+        if user_i == user:
+            #predicted pos
+            if result[i][j] <= p.THRESHOLD:
+                tp+=1
+            #predicted neg
+            else:
+                fn+=1
+        #actual negative
+        else:
+            #predicted pos
+            if result[i][j] <= p.THRESHOLD:
+                fp +=1
+            #predicted neg
+            else:
+                tn+=1
+        print(f"TP: {tp}\nTN: {tn}\nFP: {fp}\nFN: {fn}")
+        total += 1
 
 ## convert the array into a dataframe
 df = pd.DataFrame (result)
@@ -73,3 +98,5 @@ df = pd.DataFrame (result)
 filepath = 'testing-results.xlsx'
 
 df.to_excel(filepath, index=False)
+
+print(f"FINAL RESULTS:\nTP: {tp}\nTN: {tn}\nFP: {fp}\nFN: {fn}\n Accuracy: {(tp+tn)/(tp+tn+fn+fp)}")
