@@ -40,7 +40,7 @@ def args():
     return ret
 
 
-def enroll(name,file, change_sr: Optional[bool] = False):
+def enroll(name,file, change_sr: Optional[float] = None):
     """Enroll a user with an audio file
         inputs: str (Name of the person to be enrolled and registered)
                 str (Path to the audio file of the person to enroll)
@@ -55,7 +55,7 @@ def enroll(name,file, change_sr: Optional[bool] = False):
     
     # try:
     print("Processing enroll sample....")
-    preprocess_wav(file)
+    preprocess_wav(file, change_sr=change_sr)
     enroll_result = get_embedding("processed.wav", p.MAX_SEC)
     enroll_embs = np.array(enroll_result.tolist())
     speaker = name
@@ -105,7 +105,7 @@ def get_users():
     else:
         print("Path doesn't exist")
 
-def recognize(file, name, is_eucl: Optional[bool] = False, change_sr: Optional[bool] = False):
+def recognize(file, name, is_eucl: Optional[bool] = False, change_sr: Optional[float] = None):
     """Recognize the input audio file by comparing to saved users' voice prints
         inputs: str (Path to audio file of unknown person to recognize)
         outputs: str (Name of the person recognized)"""
@@ -125,7 +125,7 @@ def recognize(file, name, is_eucl: Optional[bool] = False, change_sr: Optional[b
         
     # distances = {}
     print("Processing test sample....")
-    preprocess_wav(file)
+    preprocess_wav(file, change_sr=change_sr)
     test_result = get_embedding("processed.wav", p.MAX_SEC)
     test_embs = np.array(test_result.tolist())
     emb = name + '.npy'
@@ -135,7 +135,7 @@ def recognize(file, name, is_eucl: Optional[bool] = False, change_sr: Optional[b
     else:
         distance = cdist(test_embs, enroll_embs, metric="cosine")[0][0]
     # print(p.THRESHOLD)
-    if distance<0.03:
+    if distance<p.THRESHOLD:
         print("Authenticated: True")
         print("Score: ",distance)
     else:

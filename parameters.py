@@ -18,4 +18,4 @@ INPUT_SHAPE=(NUM_FFT,None,1)
 EMBED_LIST_FILE = "data/embed"
 
 # Recognition
-THRESHOLD = 0.45
+THRESHOLD = 0.35

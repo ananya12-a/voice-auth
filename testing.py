@@ -57,7 +57,7 @@ for user in users:
     # path = f"data/va-samples/{user}"
     # dir_list = os.listdir(path)
     # print(path + "/" + dir_list[0])
-    enroll(str(user), f"data/va-samples-8000/{user}/enroll.wav", change_sr=True)
+    enroll(str(user), f"data/va-samples-8000/{user}/enroll.wav", change_sr=8000)
 
 
 total = 0
@@ -70,7 +70,7 @@ for i, user_i in enumerate(users):
         # path = f"data/va-samples/{user}"
         # dir_list = os.listdir(path)
         # print(path + "/" + dir_list[1])
-        result[i][j] = recognize(f"data/va-samples-8000/{user_i}/sample.wav", str(user), is_eucl=False, change_sr=True)
+        result[i][j] = recognize(f"data/va-samples-8000/{user_i}/sample.wav", str(user), is_eucl=False, change_sr=16000)
         #actual positive
         if user_i == user:
             #predicted pos
@@ -87,7 +87,7 @@ for i, user_i in enumerate(users):
             #predicted neg
             else:
                 tn+=1
-        print(f"TP: {tp}\nTN: {tn}\nFP: {fp}\nFN: {fn}")
+        # print(f"TP: {tp}\nTN: {tn}\nFP: {fp}\nFN: {fn}")
         total += 1
 
 ## convert the array into a dataframe
@@ -99,4 +99,4 @@ filepath = 'testing-results.xlsx'
 
 df.to_excel(filepath, index=False)
 
-print(f"FINAL RESULTS:\nTP: {tp}\nTN: {tn}\nFP: {fp}\nFN: {fn}\n Accuracy: {(tp+tn)/(tp+tn+fn+fp)}")
+print(f"FINAL RESULTS:\nTP: {tp}\nTN: {tn}\nFP: {fp}\nFN: {fn}\n Accuracy: {(tp+tn)*100/(tp+tn+fn+fp)}")

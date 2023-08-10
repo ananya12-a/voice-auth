@@ -142,7 +142,7 @@ def preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray],
                    normalize: Optional[bool] = True,
                    trim_silence: Optional[bool] = True,
                    reduce_noise: Optional[bool] = False,
-                   change_sr: Optional[bool] = False):
+                   change_sr: Optional[float] = None):
     """
     Applies the preprocessing operations used in training the Speaker Encoder to a waveform 
     either on disk or in memory. The waveform will be resampled to match the data hyperparameters.
@@ -167,8 +167,8 @@ def preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray],
     # Resample the wav if needed
     if source_sr is not None and source_sr != sampling_rate:
         wav = librosa.resample(wav, source_sr, sampling_rate)
-    if change_sr:
-        wav = librosa.resample(wav, orig_sr=source_sr, target_sr=p.SAMPLE_RATE)
+    if change_sr is not None:
+        wav = librosa.resample(wav, orig_sr=source_sr, target_sr=change_sr)
     # Apply the preprocessing: normalize volume and shorten long silences 
     if normalize:
         wav = normalize_volume(wav, audio_norm_target_dBFS, increase_only=True)
