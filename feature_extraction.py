@@ -9,8 +9,16 @@ import torch
 from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
 from pyannote.audio import Audio
 from pyannote.core import Segment
+from pyannote.audio import Model
+from pyannote.audio import Inference
 import wave
 import contextlib
+
+from deep_speaker.audio import read_mfcc
+from deep_speaker.batcher import sample_from_mfcc
+from deep_speaker.constants import SAMPLE_RATE, NUM_FRAMES
+from deep_speaker.conv_models import DeepSpeakerModel
+
 
 
 def buckets(max_time, steptime, frameskip):
@@ -42,17 +50,22 @@ def get_duration(wav_file):
         return duration
 
 def get_embedding(wav_file, max_time):
-    model = PretrainedSpeakerEmbedding(
-        "speechbrain/spkrec-ecapa-voxceleb")
-        #device=torch.device("cuda"))
-    audio = Audio(sample_rate=p.SAMPLE_RATE, mono="downmix")
-    # buckets_var = buckets(p.MAX_SEC, p.BUCKET_STEP, p.FRAME_STEP)
-    # signal = get_fft_spectrum(wav_file, buckets_var)
-    
-    # embedding = np.squeeze(model.predict(signal.reshape(1,*signal.shape,1)))
-    waveform, sample_rate = audio.crop(wav_file, Segment(0, get_duration(wav_file)))
-    embedding = model(waveform.reshape(1,*waveform.shape))
-    return embedding
+    # model = PretrainedSpeakerEmbedding(
+    #     "speechbrain/spkrec-ecapa-voxceleb")
+    # audio = Audio(sample_rate=p.SAMPLE_RATE, mono="downmix")
+    # waveform, sample_rate = audio.crop(wav_file, Segment(0, get_duration(wav_file)))
+    # embedding = model(waveform.reshape(1,*waveform.shape))
+    # return embedding
+    # model = Model.from_pretrained("pyannote/embedding", 
+    #                           use_auth_token="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")
+    # inference = Inference(model, window="whole")
+    # embedding = inference(wav_file)
+    # return embedding.reshape(-1,1)
+    model = DeepSpeakerModel()
+    model.m.load_weights('ResCNN_triplet_training_checkpoint_265.h5', by_name=True)
+    mfcc_001 = sample_from_mfcc(read_mfcc(wav_file, p.SAMPLE_RATE), NUM_FRAMES)
+    predict_001 = model.m.predict(np.expand_dims(mfcc_001, axis=0))
+    return predict_001
 
 
 def get_embedding_batch(model, wav_files, max_time):

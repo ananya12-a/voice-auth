@@ -22,6 +22,8 @@ from preprocessing import *
 from preprocess import get_fft_spectrum
 import parameters as p
 
+from deep_speaker.test import batch_cosine_similarity
+
 # args() returns the args passed to the script
 def args():
     parser = argparse.ArgumentParser()
@@ -133,7 +135,8 @@ def recognize(file, name, is_eucl: Optional[bool] = False, change_sr: Optional[f
     if is_eucl:
         distance = euclidean(test_embs, enroll_embs)
     else:
-        distance = cdist(test_embs, enroll_embs, metric="cosine")[0][0]
+        # distance = cdist(test_embs, enroll_embs, metric="cosine")[0][0]
+        distance = batch_cosine_similarity(test_embs, enroll_embs)[0]
     # print(p.THRESHOLD)
     if distance<p.THRESHOLD:
         print("Authenticated: True")

@@ -57,7 +57,7 @@ for user in users:
     # path = f"data/va-samples/{user}"
     # dir_list = os.listdir(path)
     # print(path + "/" + dir_list[0])
-    enroll(str(user), f"data/va-samples-8000/{user}/enroll.wav", change_sr=8000)
+    enroll(str(user), f"data/va-samples-8000/{user}/enroll.wav")
 
 
 total = 0
@@ -70,7 +70,7 @@ for i, user_i in enumerate(users):
         # path = f"data/va-samples/{user}"
         # dir_list = os.listdir(path)
         # print(path + "/" + dir_list[1])
-        result[i][j] = recognize(f"data/va-samples-8000/{user_i}/sample.wav", str(user), is_eucl=False, change_sr=16000)
+        result[i][j] = recognize(f"data/va-samples-8000/{user_i}/sample.wav", str(user), is_eucl=False)
         #actual positive
         if user_i == user:
             #predicted pos
